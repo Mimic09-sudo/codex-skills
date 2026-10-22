@@ -1,6 +1,6 @@
 ---
 name: ctf-wsl-toolchain
-description: Base execution layer for every authorized local CTF, wargame, or crackme solve on this laptop. Load it alongside any pwn, reversing, crypto, forensics, stego, web, mobile, game, or network solver skill so Codex uses the preinstalled Ubuntu-24.04 WSL tools directly; do not use for unrelated external targets.
+description: Base execution layer for every authorized local CTF, wargame, or crackme solve on this laptop. Load it alongside any pwn, reversing, crypto, forensics, stego, web, mobile, game, or network solver skill so Codex discovers and uses the installed Ubuntu WSL tools directly; do not use for unrelated external targets.
 ---
 
 # CTF WSL Toolchain
@@ -14,7 +14,8 @@ description: Base execution layer for every authorized local CTF, wargame, or cr
 ## Operating principle
 
 - Perform the analysis and run the tools yourself in WSL. Do not turn the workflow into instructions for the user unless they explicitly ask for commands or a tutorial.
-- Use distro `Ubuntu-24.04`. The normal Linux user is `mimic09`.
+- The registered distro name on this laptop is currently `Ubuntu` (Ubuntu 24.04 internally), and the normal Linux user is `ogh09`. A WSL registration name is not necessarily the OS release name.
+- From Windows, confirm the registration with `wsl.exe --list --quiet` when a command reports `WSL_E_DISTRO_NOT_FOUND`. Prefer `Ubuntu-24.04` only if that exact registered name exists; otherwise use the single installed Ubuntu distro or the current default.
 - Stay within the user-provided CTF, wargame, local artifact, or otherwise authorized target scope. Do not infer permission to scan unrelated external systems.
 - Prefer existing tools over reinstalling them. Install an additional package only when the challenge genuinely requires it, then verify the installation.
 
@@ -30,18 +31,18 @@ Determine the host once at the start of the task:
 For a direct executable with simple arguments, call WSL without an extra shell:
 
 ```powershell
-wsl.exe -d Ubuntu-24.04 -- <tool> <args>
+wsl.exe -d Ubuntu -- <tool> <args>
 ```
 
 For commands that need shell expansion, PATH initialization, pipelines, or redirection:
 
 ```powershell
-wsl.exe -d Ubuntu-24.04 -- bash -lc '<command>'
+wsl.exe -d Ubuntu -- bash -lc '<command>'
 ```
 
-PowerShell can corrupt nested Bash quoting and `$variables`. For any nontrivial workflow, create a task-local `.sh` file with `apply_patch`, invoke it as `/mnt/c/.../script.sh`, and keep generated challenge artifacts in the task workspace. Never embed a disclosed password in a command, script, or file; administrator access is available through `wsl.exe -d Ubuntu-24.04 -u root -- ...` when truly needed.
+PowerShell can corrupt nested Bash quoting and `$variables`. For any nontrivial workflow, create a task-local `.sh` file with `apply_patch`, invoke it as `/mnt/c/.../script.sh`, and keep generated challenge artifacts in the task workspace. Never embed a disclosed password in a command, script, or file; administrator access is available through `wsl.exe -d <discovered-distro> -u root -- ...` when truly needed.
 
-Translate unfamiliar Windows workspace paths with `wsl.exe -d Ubuntu-24.04 -- wslpath -a -u <windows-path>` instead of guessing the mount path.
+Translate unfamiliar Windows workspace paths with `wsl.exe -d Ubuntu -- wslpath -a -u <windows-path>` instead of guessing the mount path. If the registered distro differs, substitute the discovered exact name.
 
 ### From inside WSL
 
@@ -55,16 +56,12 @@ export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
 
 ## Canonical runtimes and entry points
 
-- General Python/CTF packages: `ctf-python` or `/home/mimic09/ctf-tools/python-venv/bin/python`
-- pwndbg: `pwndbg`; GEF alternative: `gdb-gef`
-- Ghidra headless: `analyzeHeadless` or `/opt/ghidra/support/analyzeHeadless`
-- SageMath: `sage`
-- General tools root: `/home/mimic09/ctf-tools`
-- Wordlists: `/home/mimic09/ctf-tools/SecLists`
-- Payload references: `/home/mimic09/ctf-tools/PayloadsAllTheThings`
-- Separate proxy runtime: `mitmproxy`, `mitmdump`, and `mitmweb`
+- General Python currently: `python3`; its pwntools import is verified. Prefer `ctf-python` only when `command -v ctf-python` proves the wrapper exists.
+- Debugger baseline: `gdb`; pwndbg currently lives at `$HOME/pwndbg/.venv/bin/pwndbg`.
+- `checksec` currently lives at `$HOME/.local/bin/checksec` and may be found by a login shell.
+- Resolve specialized tools such as Ghidra, SageMath, radare2, angr, z3, Frida, Volatility, and proxy runtimes with `command -v` or a focused import check before relying on them.
 
-Use `ctf-python` for pwntools, angr, z3, Crypto, Volatility, Scapy, Capstone, Unicorn, Keystone, Frida, capa, and FLOSS imports. Do not install those packages into the system Python.
+Do not copy absolute paths from another workstation profile. Resolve the current WSL home and rediscover paths if the username or distro changes.
 
 Read [references/tool-map.md](references/tool-map.md) when choosing among installed tools or locating a specialized command. Run `scripts/check-toolchain.ps1` from Windows or `bash scripts/check-toolchain.sh` from WSL only when the environment appears unavailable or after modifying the toolchain; do not spend time health-checking every challenge.
 
@@ -78,7 +75,7 @@ Read [references/tool-map.md](references/tool-map.md) when choosing among instal
 
 ## Failure handling
 
-- If a command is missing, consult the tool map and check `$HOME/.local/bin`, `/usr/local/bin`, and the relevant virtual environment before installing a duplicate.
+- If a command is missing, consult the tool map and check the current user's `.local/bin`, `/usr/local/bin`, and relevant virtual environments before installing a duplicate.
 - If Python dependencies conflict, keep the general CTF and mitmproxy virtual environments separate.
 - If GUI access is unnecessary, prefer headless and CLI modes. Use a GUI only when it materially improves the analysis.
-- If a task requires privileged packet capture or system changes, scope the command narrowly and use WSL root directly rather than asking for or replaying a password.
+- If a task requires privileged packet capture or system changes, scope the command narrowly and use the discovered distro with WSL root directly rather than asking for or replaying a password.

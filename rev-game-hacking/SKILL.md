@@ -1,6 +1,6 @@
 ---
 name: rev-game-hacking
-description: 게임/시뮬레이션 바이너리 reversing을 담당합니다. Unity/Unreal/커스텀 엔진의 게임 로직, 치트 방지 우회, 세이브 포맷 해석, 리소스 추출, 게임 내 숨겨진 조건 분석을 수행합니다.
+description: Solve authorized game and simulation reversing challenges by identifying Unity/Unreal/Godot/custom-engine logic, tracing win or flag state, and producing a verified save edit, state generator, extractor, solver, hook, or minimal patch. Use for engine assets, game-state checks, replays, and CTF anti-cheat wrappers; use general reversing skills for non-game binaries.
 license: MIT
 metadata:
   domain: ctf
@@ -8,8 +8,6 @@ metadata:
   subcategory: game-hacking
   language: ko
 ---
-
-You must say "REV SKILL ACTIVE" once before analysis.
 
 ## Local execution base
 
@@ -22,18 +20,20 @@ Load and follow `ctf-wsl-toolchain` before local extraction, analysis, emulation
 - 게임 로직 추출, 승리/클리어 조건 역추적, 세이브/리플레이 포맷 해석, 리소스(에셋) 추출을 수행합니다.
 - 안티치트/무결성 검사 우회가 필요한 경우 최소한의 패치 또는 우회 경로를 찾습니다.
 
-## Oracle 메타 실행 규칙
+## 라우팅
 
-- 언제 load: 게임 엔진 기반 바이너리, 세이브/리플레이 조작, 게임 로직 역추적이 핵심일 때 load합니다.
-- 같이 load할 skill: 네이티브 코드 추적은 `rev-static`, .NET 난독화 해제는 `rev-obfuscation`과 함께 진행합니다.
-- 언제 안 load: 게임이 아닌 일반 바이너리라면 `rev-static`으로 전환합니다.
+- 게임 엔진 기반 바이너리, 세이브/리플레이, 게임 상태 역추적이 핵심일 때 사용합니다.
+- 단순 네이티브/managed 검증만 남으면 `rev-ctf-fastpath`로 전환합니다.
+- 패킹, 다단계, 복잡한 VM·난독화, 대규모 asset/corpus면 `rev-final-fastpath`로 전환합니다.
+- 저장소에 없는 스킬이나 도구를 전제로 계획하지 않습니다.
 
-### 첫 10분 체크리스트
+### 초기 분석 게이트
 
-- **0-2분**: 엔진 시그니처(Unity/Unreal/Godot/커스텀)와 리소스 파일 구조를 식별합니다.
-- **2-4분**: 입력 이벤트, 승리/실패 문자열, 상태 관리 클래스(GameManager류)를 문자열/xref로 고정합니다.
-- **4-7분**: Update/Tick 루프와 상태 전이 지점을 찾아 클리어 조건 경로를 좁힙니다.
-- **7-10분**: 세이브/리플레이/무결성 검사 유무를 판별하고 `rev-static`/`rev-obfuscation`/`rev-delivery` 연계 계획을 확정합니다.
+- 엔진 시그니처(Unity/Unreal/Godot/커스텀)와 리소스 파일 구조를 식별합니다.
+- 입력 이벤트, 승리/실패 문자열, 상태 관리 클래스(GameManager류)를 문자열/xref로 고정합니다.
+- Update/Tick 루프와 상태 전이 지점을 찾아 클리어 조건 경로를 좁힙니다.
+- 세이브/리플레이/무결성 검사 유무를 판별하고 직접 solve, `rev-ctf-fastpath`, `rev-final-fastpath` 중 하나를 확정합니다.
+- 시간 경과만으로 분석을 중단하지 않습니다. 승리 predicate, 상태 변수, serialization 관계가 계속 좁혀지면 해당 경로를 유지합니다.
 
 - 산출물: 게임 로직 분석 결과(핵심 상태/조건), 조작된 세이브(해당 시), 패치본(필요 시)
 
@@ -53,7 +53,7 @@ Load and follow `ctf-wsl-toolchain` before local extraction, analysis, emulation
 - 승리/클리어 조건부터 역추적합니다. flag 출력, 스코어 조건, 숨겨진 씬 전환을 먼저 찾습니다.
 - 리소스 추출은 목적이 있을 때만 수행합니다. 전체 에셋 덤프는 시간 낭비입니다.
 - 패치는 최소 범위로 합니다. 게임 전체를 리빌드하지 않습니다.
-- 이 skill은 **게임 형태 문제 전용**입니다. 일반 리버싱은 `rev-static`으로 전환합니다.
+- 이 skill은 **게임 형태 문제 전용**입니다. 일반 리버싱은 `rev-ctf-fastpath`로 전환합니다.
 
 ## 절차
 
@@ -83,7 +83,7 @@ Load and follow `ctf-wsl-toolchain` before local extraction, analysis, emulation
 - Unity IL2CPP: il2cppdumper → dummy DLL 생성 → 오프셋 매핑 → IDA/Ghidra
 - Unreal: UnrealPakTool, FModel, UAssetAPI → 에셋 추출 및 분석
 - Godot: gdre_tools → .pck 추출, GDScript 디컴파일
-- 커스텀 엔진: 일반 정적 분석 (rev-static으로 전환 가능)
+- 커스텀 엔진: 일반 정적 분석 (`rev-ctf-fastpath`로 전환 가능)
 
 핵심 추적 대상:
 - 게임 상태 관리 클래스/구조체 (GameManager, LevelController 등)

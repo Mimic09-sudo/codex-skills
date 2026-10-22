@@ -49,7 +49,7 @@ Valid blocker categories include `account`, `policy`, `sandbox`, `runtime`, `mis
 Run all calculations with:
 
 ```text
-python C:/Users/ogh00/.codex/skills/rev-55-sol-bridge/scripts/compare_evals.py run1.json run2.json ...
+python <skill-dir>/scripts/compare_evals.py run1.json run2.json ...
 ```
 
 ## Metrics in Priority Order

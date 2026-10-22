@@ -1,0 +1,4 @@
+interface:
+  display_name: "CTF Fastpath"
+  short_description: "Classify CTF problems and choose the fastest solve path"
+  default_prompt: "Use $ctf-fastpath to classify this challenge and pick the cheapest solve path."

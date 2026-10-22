@@ -1,60 +1,65 @@
-# Installed CTF tool map
+# CTF Tool Discovery Map
 
-Use this as a routing guide, not as a requirement to run every tool.
+Use this as a routing and discovery guide. It intentionally avoids claiming that every specialist tool is installed.
 
-## Baseline triage and build
+## Verified Baseline on This Laptop
+
+- WSL registration: `Ubuntu`
+- OS inside WSL: Ubuntu 24.04
+- normal user: `ogh09`
+- baseline commands observed: `python3`, `gdb`, `file`, `checksec`
+- Python `pwn` import: available
+- pwndbg entry point: `$HOME/pwndbg/.venv/bin/pwndbg`
+
+Run `scripts/check-toolchain.ps1` after a tool failure or environment change to refresh the evidence. Do not run the full check before every challenge.
+
+## Baseline Triage and Build
+
+Resolve as needed with `command -v`:
 
 - `file`, `strings`, `xxd`, `hexdump`, `readelf`, `objdump`, `nm`, `ldd`, `checksec`
-- `gcc`, `g++`, multilib, `clang`, `llvm`, `nasm`, `yasm`, `make`, `cmake`
+- `gcc`, `g++`, `clang`, `nasm`, `make`, `cmake`
 - `strace`, `ltrace`, `patchelf`, `pwninit`
-- Cross-architecture execution: `qemu-aarch64`, `qemu-arm`, `qemu-mips`, `qemu-mipsel`, and other QEMU user targets
+- cross-architecture QEMU user targets
 
-## Pwn and binary exploitation
+## Pwn
 
-- Debuggers: `pwndbg`, `gdb-gef`, `gdb-multiarch`, `lldb`
-- Automation: `ctf-python` with pwntools
-- ROP and mitigations: `ROPgadget`, `ropper`, `one_gadget`, `seccomp-tools`, `checksec`
-- Heap and libc references:
-  - `/home/mimic09/ctf-tools/how2heap`
-  - `/home/mimic09/ctf-tools/libc-database`
-  - `/home/mimic09/ctf-tools/glibc-all-in-one`
+Prefer:
 
-## Reversing, mobile, and managed code
+- `python3` with pwntools when `import pwn` succeeds
+- `gdb`, then the verified pwndbg venv path when pwndbg features are needed
+- `ROPgadget`, `ropper`, `one_gadget`, and `seccomp-tools` only after `command -v` succeeds
 
-- `analyzeHeadless` / Ghidra, `r2` / radare2, `lldb`
-- `jadx`, `apktool`, `aapt`, `adb`
-- `upx`, `pycdc`, `frida`, `capa`, `floss`, `apkid`
-- Java, Go, Rust, Mono, and MinGW build/runtime support is installed.
-- PyInstaller extraction: `/home/mimic09/ctf-tools/pyinstxtractor`
+Discover helper corpora such as how2heap, libc-database, and glibc-all-in-one under the current user's home. Do not assume another user's `/home/.../ctf-tools` tree exists.
 
-## Crypto and constraint solving
+## Reversing and Mobile
 
-- `sage`, `pari-gp`, `gap`, `maxima`
-- `ctf-python` packages include `z3`, PyCryptodome, SymPy, and common number/constraint libraries.
+Check for the narrow tool required by the artifact:
 
-## Forensics, documents, and steganography
+- native: Ghidra `analyzeHeadless`, radare2 `r2`, `objdump`, `gdb`, `lldb`
+- managed: Java/.NET decompilers and Mono tooling
+- Android: `jadx`, `apktool`, `aapt`, `adb`
+- packing/instrumentation: `upx`, Frida, capa, FLOSS
 
-- `vol` / Volatility 3, `binwalk`, `foremost`, `bulk_extractor`, `sleuthkit`
-- `exiftool`, `yara`, `oletools`, `pdf-parser.py` and other Didier Stevens utilities
-- `steghide`, `stegseek`, `zsteg`, `stegoveritas`, `pngcheck`, ImageMagick
-- Password recovery: `hashcat`, `john`, `fcrackzip`, `pdfcrack`
+If a command is absent, check `/opt`, `/usr/local/bin`, and the current user's local tool directories before installing anything.
 
-## Web, network, and services
+## Crypto and Constraints
 
-- Discovery/traffic: `nmap`, `masscan`, `tshark`, `tcpdump`, Wireshark tooling
-- Web testing: `sqlmap`, `ffuf`, `gobuster`, `wfuzz`, `nikto`, `whatweb`, `dirb`
-- Proxying and instrumentation: `mitmproxy`, `mitmdump`, `mitmweb`, `frida`
-- Protocol and Windows-domain helpers: Impacket commands through the CTF Python environment
-- Credential testing tools such as `hydra` are installed; use only against explicit challenge targets.
+Probe only the required runtime:
 
-## Corpora and helper repositories
+- `python3 -c "import z3"`
+- `python3 -c "import Crypto"`
+- `python3 -c "import sympy"`
+- `sage`, `pari-gp`, `gap`, or `maxima` for challenges that justify them
 
-- SecLists: `/home/mimic09/ctf-tools/SecLists`
-- PayloadsAllTheThings: `/home/mimic09/ctf-tools/PayloadsAllTheThings`
-- DidierStevensSuite: `/home/mimic09/ctf-tools/DidierStevensSuite`
+## Forensics and Steganography
 
-## Python environment separation
+Common candidates include Volatility, `binwalk`, `foremost`, Sleuth Kit, `exiftool`, `yara`, oletools, `tshark`, `steghide`, `stegseek`, `zsteg`, `pngcheck`, ImageMagick, `hashcat`, and `john`. Verify availability before selecting a workflow.
 
-- General CTF venv: `/home/mimic09/ctf-tools/python-venv`
-- mitmproxy venv: `/home/mimic09/ctf-tools/mitmproxy-venv`
-- Use their entry-point wrappers from `/home/mimic09/.local/bin`; do not merge the environments because their dependency constraints differ.
+## Web and Network
+
+Use only against explicit challenge targets. Candidate tools include `tshark`, `tcpdump`, `nmap`, `ffuf`, `gobuster`, `sqlmap`, and proxy runtimes. Prefer the smallest tool that answers the current hypothesis; tool availability never expands authorization.
+
+## Python Environment Rule
+
+Use an existing isolated environment when one is discovered. Do not merge unrelated venvs or install into system Python merely because an older absolute path in a skill is unavailable.

@@ -20,7 +20,7 @@ native binaries, managed/mobile targets, scripts, custom VMs, generated executab
 writeups, solvers, hooks, dumps, and extracted stages. Treat corpus statistics as inventory evidence,
 not as a substitute for per-target analysis.
 
-## First 180 Seconds
+## Fast Triage
 
 Run this before deep analysis:
 
@@ -31,7 +31,7 @@ Run this before deep analysis:
 5. If there are many similar instances, compare first/middle/last samples before deep analysis: format, entry points, operand grammar, opcode bytes, sizes, and output shape.
 6. Pick exactly one solve lane. Do not analyze multiple lanes deeply at the same time.
 
-If there is no anchor after 10 minutes, switch to dynamic observation. If there is no recoverable condition after 20 minutes, switch to dump/patch/oracle.
+Do not use elapsed time as a stopping rule. Switch to dynamic observation when repeated static work adds no anchor or smaller slice; switch to dump, patch, or oracle only when the current boundary stops producing stronger evidence.
 
 ## Scale Gate
 

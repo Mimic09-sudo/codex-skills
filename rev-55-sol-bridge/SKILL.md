@@ -51,9 +51,9 @@ Use this loop. Keep triage broad and cheap; keep deep analysis to one lane.
 
 - Identify the challenge root, target artifacts, prompt constraints, architecture/runtime, and whether execution or network interaction is authorized.
 - Run deterministic triage once when useful:
-  `python C:/Users/ogh00/.codex/skills/rev-55-sol-bridge/scripts/triage.py <challenge-root>`
+  `python <skill-dir>/scripts/triage.py <challenge-root>`
 - For hard, stalled, or user-requested max/5.6-like GPT-5.5 runs, initialize the hard-case workspace before the second deep action:
-  `python C:/Users/ogh00/.codex/skills/rev-55-sol-bridge/scripts/hardcase_init.py <challenge-root>`
+  `python <skill-dir>/scripts/hardcase_init.py <challenge-root>`
   Then read [Hard reverse boost](references/hard-rev-boost.md).
 - Execute the target once only when safe and cheap. Capture input shape, exact output, required files, sleeps/crashes, and whether original verification is possible.
 - Existing writeups or solvers may be used only when the user permits local artifacts, the task is corpus learning/review, or they are supplied as part of the challenge.
@@ -134,7 +134,7 @@ For hard, ambiguous, resumed, or repeatedly failing work, read [5.5 control harn
 
 ## Pulling the Deep Playbook
 
-Read `C:/Users/ogh00/.codex/skills/rev-final-fastpath/SKILL.md` only when:
+Load `rev-final-fastpath` only when:
 
 - a lane is selected but its bridge card lacks the needed technique
 - evidence matches a specialized local corpus pattern

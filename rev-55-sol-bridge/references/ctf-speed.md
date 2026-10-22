@@ -1,6 +1,6 @@
 # CTF Throughput Mode
 
-Use this for live contests or a folder of multiple reversing challenges. Optimize verified solves per hour, not explanation quality or time spent per task.
+Use this for live contests or a folder of multiple reversing challenges. Optimize verified progress across the queue without abandoning a target solely because an estimate or wall-clock threshold expired.
 
 ## Lineup Screenshots
 
@@ -20,7 +20,7 @@ By default, avoid flag and submitted-answer screenshots. If the user explicitly 
 Run deterministic folder ranking when applicable:
 
 ```text
-python C:/Users/ogh00/.codex/skills/rev-55-sol-bridge/scripts/queue_triage.py <event-root> --json
+python <skill-dir>/scripts/queue_triage.py <event-root> --json
 ```
 
 Treat the ranking as a first-pass estimate, then correct it using observed sinks and runtime/tool availability.
@@ -30,7 +30,7 @@ Treat the ranking as a first-pass estimate, then correct it using observed sinks
 - `red`: huge corpus without a recovered grammar, heavy anti-debug, giant unknown runtime, weak remote-only signal
 - `blocked`: missing artifact/server/tool/account/policy
 
-Solve greens first. Within a class, prefer the task with the highest estimated probability of original verification in the least remaining time. Contest points matter only if the user says to optimize score instead of solve count.
+Solve greens first. Within a class, prefer the task with the clearest path to original verification. Contest points matter only if the user says to optimize score instead of solve count.
 
 ## Board
 
@@ -66,14 +66,14 @@ Update only on solve, park, blocker, or lane-changing evidence. Do not turn the 
 4. Build the smallest extractor/model/hook.
 5. Verify on the original and stop.
 
-Default budgets are evidence budgets, with wall time as a backstop:
+Use evidence gates, not wall-clock budgets:
 
 - triage: one inventory pass plus one safe run
-- green: two deep actions or roughly 10–15 minutes
-- yellow: four deep actions or roughly 25–35 minutes
-- red: two probing actions or roughly 10 minutes, then park unless it becomes green/yellow
+- continue while each deep action produces a new sink, target buffer, trace, model checkpoint, extracted artifact, candidate, failed invariant, or verifier result
+- pivot the observation boundary when work repeats without narrowing the model
+- park only for a concrete blocker or an explicit queue-priority decision, and retain the cheapest reproducible next action
 
-A deep action earns continuation only if it produces a new sink, target buffer, trace, model checkpoint, extracted artifact, candidate, or verifier result.
+Hard targets may require many deep actions. Do not demote or park them while evidence is still accumulating.
 
 ## Fast Route Bias
 
@@ -88,16 +88,16 @@ When evidence permits, prefer:
 7. compact bytecode interpreter over repeated native emulation
 8. stage/artifact extraction over loader, renderer, or UI analysis
 
-## Park Immediately When
+## Reassess or Pivot When
 
-- two deep actions yield no decisive evidence
+- repeated deep actions yield no decisive evidence or failed invariant
 - the same large file or decompiler region is being reread
 - symbolic/path exploration grows before the check is sliced
-- two hook captures are noisy at the same boundary
+- repeated hook captures are noisy at the same boundary
 - original runtime is unavailable and no stronger supporting verifier can be built
 - a required remote, file, secret, account, or policy permission is missing
 
-Save one cheapest next action. Parking is a throughput decision, not a failure.
+Change the lane or observation boundary first. If the task is concretely blocked or the user wants another queue item prioritized, save one cheapest next action before parking.
 
 ## Verification Budget
 

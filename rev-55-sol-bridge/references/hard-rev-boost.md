@@ -16,7 +16,7 @@ Use this reference when any item is true:
 Create a hard-case scratch pad before the second deep action:
 
 ```text
-python C:/Users/ogh00/.codex/skills/rev-55-sol-bridge/scripts/hardcase_init.py <challenge-root>
+python <skill-dir>/scripts/hardcase_init.py <challenge-root>
 ```
 
 If the user supplied a different scratch directory, pass `--scratch <dir>`. The script creates:
