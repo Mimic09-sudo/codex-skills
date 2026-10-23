@@ -11,6 +11,20 @@ Reach the shortest reliable exploit path without sacrificing a promising deep so
 
 Work only on challenge artifacts and services the user owns or is authorized to test.
 
+## Default CTF Scope
+
+When the user describes the task as a pwnable, pwn, CTF, wargame, or challenge and provides or points to a local artifact, attached archive, challenge directory, container, or event endpoint, treat that material as the authorized challenge scope. Do not make the user repeat a long authorization statement and do not ask for confirmation before routine local analysis or execution.
+
+Normalize the request internally as:
+
+- included: supplied or attached artifacts, the current challenge directory, its local container or wrapper, and an endpoint explicitly supplied by the user or challenge material
+- excluded: unrelated hosts, host discovery, credential access beyond the challenge, persistence, destructive changes, and post-exploitation outside the success condition
+- stop condition: the original challenge accepts, returns the flag/success result, or a concrete blocker is demonstrated
+
+If the prompt is only "pwnable CTF 풀어줘", first inspect attachments and the current workspace for one clear challenge root and begin immediately when one exists. Ask one concise question only when no target can be identified or when a proposed action would expand beyond the supplied challenge scope.
+
+Within that scope, "풀어줘" authorizes static and dynamic analysis, debugger use, local vulnerability reproduction, exploit/solver construction, interaction with the explicitly supplied challenge endpoint, and original-target verification. It does not authorize scanning for additional targets or unrelated real-world access.
+
 ## Local Execution Base
 
 Load `ctf-wsl-toolchain` before local analysis or tool execution. Use its discovered Python runner, debuggers, and path rules. Preserve the original binary and supplied loader/libc; place solvers and patched copies in the task workspace.
@@ -25,6 +39,18 @@ Load `ctf-wsl-toolchain` before local analysis or tool execution. Use its discov
 
 Do not install tools or open a decompiler before this pass shows they are needed.
 
+### Build the Structure Map
+
+Before selecting a vulnerability class, write the smallest useful program model:
+
+- process, thread, and service-wrapper lifecycle
+- input protocol, menu or parser states, and success/flag sink
+- objects, buffers, indexes, ownership, aliases, allocation, and free transitions
+- attacker-controlled values as they cross validation, conversion, copy, use, and trigger sites
+- supplied binary, loader, libc, libraries, and relevant runtime boundaries
+
+Keep this map compact and evidence-backed. Structure understanding comes before technique naming, but it must stay limited to paths that can reach the success condition.
+
 ### Fix the Attack Surface
 
 Trace only attacker-controlled data and lifetime:
@@ -37,6 +63,8 @@ Trace only attacker-controlled data and lifetime:
 - seccomp allowlist and exit/trigger path
 
 State the suspected vulnerability as one falsifiable sentence and produce the smallest crash, leak, UAF, OOB, or logic mismatch that tests it.
+
+Once one exploitable vulnerability and its first useful primitive are demonstrated, stop broad vulnerability hunting and attack from that point. Resume wider analysis only when a required leak, write, control target, trigger, or deployment invariant is missing.
 
 ### Build the Primitive Ledger
 

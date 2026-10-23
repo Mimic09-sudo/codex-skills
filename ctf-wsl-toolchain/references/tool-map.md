@@ -2,14 +2,11 @@
 
 Use this as a routing and discovery guide. It intentionally avoids claiming that every specialist tool is installed.
 
-## Verified Baseline on This Laptop
+## Per-Machine Baseline
 
-- WSL registration: `Ubuntu`
-- OS inside WSL: Ubuntu 24.04
-- normal user: `ogh09`
-- baseline commands observed: `python3`, `gdb`, `file`, `checksec`
-- Python `pwn` import: available
-- pwndbg entry point: `$HOME/pwndbg/.venv/bin/pwndbg`
+The desktop and laptop have different WSL registration names, usernames, home paths, and optional tools. Run the bundled check on the active machine and treat its output—not this file—as the current inventory.
+
+Expected baseline candidates include `python3`, `gdb`, `file`, `strings`, `readelf`, `objdump`, `ldd`, and `checksec`. User-local tools may live under `$HOME/.local/bin` or a venv such as `$HOME/pwndbg/.venv/bin/pwndbg`; verify before use.
 
 Run `scripts/check-toolchain.ps1` after a tool failure or environment change to refresh the evidence. Do not run the full check before every challenge.
 

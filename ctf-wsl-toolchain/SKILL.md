@@ -14,8 +14,8 @@ description: Base execution layer for every authorized local CTF, wargame, or cr
 ## Operating principle
 
 - Perform the analysis and run the tools yourself in WSL. Do not turn the workflow into instructions for the user unless they explicitly ask for commands or a tutorial.
-- The registered distro name on this laptop is currently `Ubuntu` (Ubuntu 24.04 internally), and the normal Linux user is `ogh09`. A WSL registration name is not necessarily the OS release name.
-- From Windows, confirm the registration with `wsl.exe --list --quiet` when a command reports `WSL_E_DISTRO_NOT_FOUND`. Prefer `Ubuntu-24.04` only if that exact registered name exists; otherwise use the single installed Ubuntu distro or the current default.
+- WSL registration names and Linux usernames differ across the user's desktop and laptop. Discover them at runtime; never hardcode `Ubuntu`, `Ubuntu-24.04`, `ogh09`, `mimic09`, or a copied home path.
+- From Windows, resolve the distro with `wsl.exe --list --quiet`. Prefer the default/first registered Ubuntu entry, otherwise the first available distro. Confirm the Linux user and home inside that distro with `id -un` and the existing `$HOME` value.
 - Stay within the user-provided CTF, wargame, local artifact, or otherwise authorized target scope. Do not infer permission to scan unrelated external systems.
 - Prefer existing tools over reinstalling them. Install an additional package only when the challenge genuinely requires it, then verify the installation.
 
@@ -31,18 +31,18 @@ Determine the host once at the start of the task:
 For a direct executable with simple arguments, call WSL without an extra shell:
 
 ```powershell
-wsl.exe -d Ubuntu -- <tool> <args>
+wsl.exe -d <resolved-distro> -- <tool> <args>
 ```
 
 For commands that need shell expansion, PATH initialization, pipelines, or redirection:
 
 ```powershell
-wsl.exe -d Ubuntu -- bash -lc '<command>'
+wsl.exe -d <resolved-distro> -- bash -lc '<command>'
 ```
 
 PowerShell can corrupt nested Bash quoting and `$variables`. For any nontrivial workflow, create a task-local `.sh` file with `apply_patch`, invoke it as `/mnt/c/.../script.sh`, and keep generated challenge artifacts in the task workspace. Never embed a disclosed password in a command, script, or file; administrator access is available through `wsl.exe -d <discovered-distro> -u root -- ...` when truly needed.
 
-Translate unfamiliar Windows workspace paths with `wsl.exe -d Ubuntu -- wslpath -a -u <windows-path>` instead of guessing the mount path. If the registered distro differs, substitute the discovered exact name.
+Translate unfamiliar Windows workspace paths with `wsl.exe -d <resolved-distro> -- wslpath -a -u <windows-path>` instead of guessing the mount path. In PowerShell, normalize backslashes to forward slashes before passing a Windows path to `wslpath` when argument parsing would otherwise consume them.
 
 ### From inside WSL
 
@@ -56,12 +56,11 @@ export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
 
 ## Canonical runtimes and entry points
 
-- General Python currently: `python3`; its pwntools import is verified. Prefer `ctf-python` only when `command -v ctf-python` proves the wrapper exists.
-- Debugger baseline: `gdb`; pwndbg currently lives at `$HOME/pwndbg/.venv/bin/pwndbg`.
-- `checksec` currently lives at `$HOME/.local/bin/checksec` and may be found by a login shell.
+- Select Python by capability: prefer `ctf-python` when it exists and imports the required packages; otherwise use `python3` after a focused import check.
+- Resolve debuggers and wrappers with `command -v`, then check user-local paths such as `$HOME/pwndbg/.venv/bin/pwndbg` and `$HOME/.local/bin`.
 - Resolve specialized tools such as Ghidra, SageMath, radare2, angr, z3, Frida, Volatility, and proxy runtimes with `command -v` or a focused import check before relying on them.
 
-Do not copy absolute paths from another workstation profile. Resolve the current WSL home and rediscover paths if the username or distro changes.
+Do not copy absolute paths from another workstation profile. The current machine's tool check is the source of truth for that run.
 
 Read [references/tool-map.md](references/tool-map.md) when choosing among installed tools or locating a specialized command. Run `scripts/check-toolchain.ps1` from Windows or `bash scripts/check-toolchain.sh` from WSL only when the environment appears unavailable or after modifying the toolchain; do not spend time health-checking every challenge.
 

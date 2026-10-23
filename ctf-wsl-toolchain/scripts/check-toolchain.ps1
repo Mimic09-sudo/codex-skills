@@ -1,16 +1,12 @@
 $ErrorActionPreference = "Stop"
 
-$preferredDistros = @("Ubuntu-24.04", "Ubuntu")
 $installedDistros = @(& wsl.exe --list --quiet) |
     ForEach-Object { ($_ -replace "`0", "").Trim() } |
     Where-Object { $_ }
 if ($LASTEXITCODE -ne 0 -or $installedDistros.Count -eq 0) {
     throw "No WSL distribution is available."
 }
-$distro = $preferredDistros | Where-Object { $installedDistros -contains $_ } | Select-Object -First 1
-if (-not $distro) {
-    $distro = $installedDistros | Where-Object { $_ -match "Ubuntu" } | Select-Object -First 1
-}
+$distro = $installedDistros | Where-Object { $_ -match "Ubuntu" } | Select-Object -First 1
 if (-not $distro) {
     $distro = $installedDistros[0]
 }
