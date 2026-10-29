@@ -6,11 +6,16 @@ Use this reference only when concrete evidence matches one of these shapes. Thes
 
 - [Keep Huge Artifacts Searchable](#keep-huge-artifacts-searchable)
 - [Fingerprint Standard Primitives](#fingerprint-standard-primitives)
+- [Map Table-Driven Verifiers into Inverse Dictionaries](#map-table-driven-verifiers-into-inverse-dictionaries)
+- [Invert Independent Byte and PRNG Checks](#invert-independent-byte-and-prng-checks)
+- [Decode Event and Timing Protocols Statically](#decode-event-and-timing-protocols-statically)
+- [Treat Patch Interfaces as Solve Contracts](#treat-patch-interfaces-as-solve-contracts)
 - [Extract and Invert Instruction Chains](#extract-and-invert-instruction-chains)
 - [Solve Stateful Per-Position Verifiers](#solve-stateful-per-position-verifiers)
 - [Freeze Input-Independent VM Paths](#freeze-input-independent-vm-paths)
 - [Reverse Batch Shared-Library Chains](#reverse-batch-shared-library-chains)
 - [Reverse Embedded Executable Farms](#reverse-embedded-executable-farms)
+- [Recover ELF Dynamic-Relocation Programs](#recover-elf-dynamic-relocation-programs)
 - [Forge Checked Record Formats](#forge-checked-record-formats)
 - [Normalize Data Structures Before Solving](#normalize-data-structures-before-solving)
 - [Respect Script Expansion Phases](#respect-script-expansion-phases)
@@ -46,6 +51,47 @@ Recognize the skeleton before translating expressions:
 - For architecture-specific crypto intrinsics, a tiny native harness or faithful emulator may be safer than manually translating compiler-specific vector expressions. Cross-check one intermediate block.
 
 Always separate `standard primitive` from `custom key/table/seed/post-XOR`. Invert the complete wrapper in exact reverse order and forward-check the result.
+
+## Map Table-Driven Verifiers into Inverse Dictionaries
+
+Use this when a checker selects from a prime table, relocation-backed function table, permutation family, or another finite candidate set.
+
+1. Recover the target sequence and enumerate the candidate domain in the checker's exact order.
+2. Evaluate each candidate under the real initial state. For function tables, resolve relocation addends or runtime pointers instead of assuming file offsets are direct code addresses.
+3. Build `observed_output -> accepted_input_symbol`. Require injectivity; if outputs collide, retain the small candidate set and resolve it with neighboring state or an original-target probe.
+4. Preserve representation details such as zero-based indexing, hexadecimal encoding, printable offsets, register order, and endianness.
+5. Replay the complete target sequence and submit the reconstructed input to the untouched checker.
+
+This pattern covers both mathematical tables, such as prime values indexed by input bytes, and executable tables whose handlers encode every permutation of a small register tuple.
+
+## Invert Independent Byte and PRNG Checks
+
+Use this when each input byte is checked independently or against a deterministic state stream.
+
+1. Extract the target bytes and write the forward expression at the exact integer width.
+2. Undo operations in reverse order. Use modular subtraction, XOR reversal, rotation reversal, and a modular inverse only when the multiplier is invertible at that width.
+3. For a stateful xorshift or similar generator, reproduce every update, increment, truncation, and byte selection before XORing the target.
+4. If control flow jumps into the middle of another instruction, disassemble from the actual branch destination and confirm the overlapping stream dynamically. Linear disassembly from the nominal function start is not authoritative.
+5. Forward-check every recovered byte and require the untouched binary's success output.
+
+## Decode Event and Timing Protocols Statically
+
+Use this when a binary encodes data through signals, alarms, sleeps, callbacks, or deliberately enormous delays.
+
+1. Recover the stored event sequence and its framing first: symbol-to-bit mapping, bit-length prefix, byte order, terminator, and record count.
+2. Model parent/child state transitions and the exact timing arithmetic, including previous-alarm remainder, scale, rounding rule, mask, and signedness.
+3. Decode the data statically rather than waiting through attacker-controlled or multi-year delays.
+4. Verify representative prefixes through the real runtime when practical, then independently parse the full stored stream and validate its format.
+
+## Treat Patch Interfaces as Solve Contracts
+
+Use this only when the challenge service explicitly asks for a patched binary.
+
+1. Identify the patchable hook, spare code cave, runtime-loaded secret or snapshot buffer, and the service's dynamic checks.
+2. Preserve architectural landing instructions such as `ENDBR64` and reuse existing reliable wrappers for output instead of adding a large payload.
+3. Keep the patch minimal: a short call or jump from the allowed hook plus a bounded cave routine that returns cleanly.
+4. Reproduce the deployment contract locally with a sentinel passed through the same inherited file descriptor, environment variable, or buffer path.
+5. Submit only after the local sentinel leaks and the patched image still satisfies structural checks. Treat remote dynamic-check success as the original verification.
 
 ## Extract and Invert Instruction Chains
 
@@ -108,6 +154,48 @@ Use when a parent stores many ELF/PE children in a table or blob and launches th
 6. Reconstruct the ordered answer and verify representative children plus the parent.
 
 Do not launch a large unknown executable corpus merely to inventory it. Prefer parsing, disassembly, sandboxed sampling, and a compact semantic model.
+
+## Recover ELF Dynamic-Relocation Programs
+
+Use this when ordinary child `.text` contains a convincing checker or decryptor, but the untouched
+parent rejects its reconstructed answer and the child has oversized or redirected dynamic metadata.
+
+1. Preserve three layers separately: the raw embedded child, the child after parent-applied patches,
+   and memory after the exact dynamic loader relocates it. Recover parent writes to `DT_RELASZ`,
+   `DT_RELA`, `DT_SYMTAB`, program headers, or relocation entries before interpreting the child.
+   Hook `fexecve`/`execve` once and hash a dumped child to prove the static reconstruction is exact.
+2. Reproduce the specified runtime. Loader relocation ordering and IFUNC behavior are part of the
+   challenge contract; a host glibc may silently take a different path. Prefer the supplied digest-
+   pinned container, or extract its loader and libc for narrow standalone probes.
+3. Treat these as VM anchors rather than malformed ELF noise: writable fake symbol tables, large
+   `RELA` arrays, repeated `R_*_64`/`R_*_COPY` mutations of symbol fields, `R_*_GLOB_DAT` writes to
+   result variables, `R_*_RELATIVE*` writes into future records or executable scratch pages, and a
+   local GNU IFUNC symbol whose resolver address is synthesized during relocation.
+4. Normalize each relocation to `(index, destination, symbol, type, addend)` in execution order.
+   Locate stable sentinels such as writes to the final status variables. Compare first/middle/last
+   children by intervals between sentinels, relocation-type strings, destinations, symbol indices,
+   and addend deltas. Variable run lengths or gaps can encode bits/nibbles even when all visible
+   immediates look constant.
+5. Use known input fragments before tracing. Container headers, image signatures, dimensions, chunk
+   trailers, padding, and parent encodings often provide accepted bytes for several boundary
+   children. Fit the smallest per-byte relation supported by those samples, such as
+   `target_i = key_i + a*x_i + b_i (mod 2^w)`. If `a` is invertible, recover `x_i` with its modular
+   inverse and confirm on held-out known chunks.
+6. If the relation is still ambiguous, differentially change one input byte in one representative
+   child. Observe relocation-program counters, loop counts, IFUNC entry registers, or status writes.
+   Prefer a lightweight `ptrace` hardware breakpoint or one scripted debugger trace; stop once it
+   identifies the slope, byte position, or state transition. Do not repeat the trace across the farm.
+7. Batch-extract encoded parameters from the parent blob, invert the parent argument encoding, and
+   reconstruct the raw artifact in numeric child order. Record raw length/hash before parsing,
+   rendering, trimming, or repairing it.
+8. Verify both channels: the candidate's format invariants (magic, dimensions, CRCs, padding) and the
+   untouched parent under the exact runtime. Also run the static candidate once when practical; a
+   clean failure is useful evidence that it was a decoy rather than a nearly correct solution.
+
+Watch the exit semantics carefully. A visible checker may exit through a relocation-controlled
+`correct` value, while the hidden accepted input deliberately fails that checker and exits through a
+relocation-controlled `wrong` value set to zero. Record the actual branch and exit code instead of
+assuming that the source-level success branch is the only accepting path.
 
 ## Forge Checked Record Formats
 

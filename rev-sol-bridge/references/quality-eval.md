@@ -1,6 +1,6 @@
 # Quality Evaluation
 
-Use this to compare skill revisions, GPT-5.5 profiles, or GPT-5.5 against GPT-5.6 Sol on authorized offline reversing tasks. The primary metric is verified solve throughput, not prose quality.
+Use this to compare skill revisions, model profiles, or reasoning settings on authorized offline reversing tasks. The primary metric is verified solve throughput, not prose quality.
 
 ## Fair Protocol
 
@@ -25,10 +25,10 @@ Use one JSON file per run:
 
 ```json
 {
-  "run_id": "vm-tangle-gpt55-bridge-v2-01",
+  "run_id": "vm-tangle-candidate-b-bridge-v2-01",
   "challenge": "vm-tangle",
-  "profile": "gpt55-xhigh-bridge-v2",
-  "model": "gpt-5.5",
+  "profile": "candidate-b-xhigh-bridge-v2",
+  "model": "model-b",
   "reasoning_effort": "xhigh",
   "skill_revision": "bridge-v2",
   "status": "solved",
@@ -91,4 +91,4 @@ Keep a bridge change only when representative results show at least one improvem
 - earlier productive dynamic pivots
 - lower median tokens per verified solve
 
-Do not claim that GPT-5.5 equals GPT-5.6 Sol. Report which challenge shapes narrowed the gap, which did not, sample size, and any access blocks that prevented a fair Sol baseline.
+Do not claim that one model or profile equals another from a narrow benchmark. Report which challenge shapes narrowed the gap, which did not, sample size, and any access blocks that prevented a fair baseline.

@@ -8,7 +8,7 @@ description: Base execution layer for every authorized local CTF, wargame, or cr
 ## Base-layer contract
 
 - Treat this skill as the common local execution substrate for every CTF-solving skill on this laptop. It should activate automatically; the user should not need to mention it separately.
-- When a domain skill such as `pwn-general`, `rev-final-fastpath`, `rev-55-sol-bridge`, or `rev-game-hacking` also applies, that skill controls the solve methodology while this skill controls the runtime, installed tools, paths, virtual environments, and host-to-WSL execution.
+- When a domain skill such as `pwn-general`, `rev-sol-bridge`, `crypto-ctf`, `forensics-ctf`, or `web-ctf` also applies, that skill controls the solve methodology while this skill controls the runtime, installed tools, paths, virtual environments, and host-to-WSL execution. For a solver-submission KotH task, `ctf-koth-solver` adds the correctness, official-Cost benchmarking, and candidate-selection layer without replacing the domain method.
 - Do not replace or weaken the domain skill's verification rules, solve contract, or artifact handling.
 
 ## Operating principle
@@ -63,6 +63,8 @@ export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
 Do not copy absolute paths from another workstation profile. The current machine's tool check is the source of truth for that run.
 
 Read [references/tool-map.md](references/tool-map.md) when choosing among installed tools or locating a specialized command. Run `scripts/check-toolchain.ps1` from Windows or `bash scripts/check-toolchain.sh` from WSL only when the environment appears unavailable or after modifying the toolchain; do not spend time health-checking every challenge.
+
+For skill maintenance or corpus audits, read [references/verified-corpus-2026-10-24.md](references/verified-corpus-2026-10-24.md). Do not load that inventory during an ordinary solve; the domain skills contain the reusable procedures.
 
 ## Workflow
 

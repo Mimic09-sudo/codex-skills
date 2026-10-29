@@ -1,12 +1,12 @@
-# Hard Reverse Boost
+# Hard Reverse Control
 
-Use this when the user asks to push GPT-5.5 as close as practical to a stronger reversing model, or when a single hard challenge is likely to exceed one short pass. This does not reproduce GPT-5.6 Sol's weights. It reduces avoidable failures: context drift, whole-binary tours, premature crypto/VM claims, unbounded search, wrapper guessing, and unverified solves.
+Use this when the user asks for maximum-depth reversing or when a single hard challenge is likely to exceed one short pass. It reduces avoidable failures: context drift, whole-binary tours, premature crypto/VM claims, unbounded search, wrapper guessing, and unverified solves.
 
 ## Entry Conditions
 
 Use this reference when any item is true:
 
-- the user asks for 5.6-like, max, extreme, hard, or fastest-many-solves behavior on GPT-5.5
+- the user asks for max, extreme, hard, or fastest-many-solves behavior
 - the target is packed, stateful, custom-VM, multi-stage, Mach-O/mobile/firmware, large, or previously stalled
 - two meaningful actions did not produce a new sink, target buffer, model checkpoint, candidate, or verifier result
 - a solved-looking answer depends on a fragile transcription, runtime-only data, or unsupported environment
@@ -28,7 +28,7 @@ If the user supplied a different scratch directory, pass `--scratch <dir>`. The 
 
 Do not treat the generated state as truth. It is a forcing function. Replace guesses with evidence as soon as tool output exists.
 
-## 5.5 Control Rules
+## Phase Control Rules
 
 Keep exactly one active phase:
 
@@ -67,7 +67,7 @@ The builder pass optimizes for a minimal working solve:
 4. Build the smallest reproducible artifact: `solve.py`, `ex.py`, extractor, hook, interpreter, patch-for-observation, or recovered file.
 5. Put all scratch under the hard-case work directory.
 
-When a lane needs deeper mechanics, read only the relevant `rev-final-fastpath` lane or local-corpus pattern, then return to this state file. Do not load multiple deep lanes at once.
+When a lane needs deeper mechanics, read only the relevant compact lane card or [local-corpus pattern](local-corpus-patterns.md), then return to this state file. Do not load multiple deep lanes at once.
 
 ## Reviewer Pass
 

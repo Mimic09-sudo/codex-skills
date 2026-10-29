@@ -37,9 +37,7 @@ metadata:
 ## 전문 스킬 라우팅
 
 - `pwn`: [pwn 빠른 참조](references/pwn.md)를 읽고 `pwn-general`로 전환한다.
-- 단순 단일 바이너리 `rev`: `rev-ctf-fastpath`로 전환한다.
-- 복합/패킹/VM/대규모/다단계 `rev`: `rev-final-fastpath`로 전환한다.
-- 게임/엔진 `rev`: `rev-game-hacking`으로 전환한다.
+- 모든 `rev`: `rev-sol-bridge`로 전환한다. 이 스킬의 evidence gate가 단순·복합·게임·대규모 lane을 하나만 선택하고 필요한 reference만 읽는다.
 - `web`: [web 빠른 참조](references/web.md)를 읽는다.
 
 존재하지 않는 전문 스킬을 가정하지 않는다. 전문 스킬이 없으면 이 스킬의 공통 계약으로 계속 진행한다.

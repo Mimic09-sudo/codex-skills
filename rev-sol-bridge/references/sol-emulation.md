@@ -1,6 +1,6 @@
-# GPT-5.5 Control Harness
+# Hard-Case Control Harness
 
-Use this only for hard, ambiguous, resumed, or repeatedly failing reversing work. It cannot reproduce GPT-5.6 Sol's weights; it reduces avoidable 5.5 errors through explicit phase control and independent verification.
+Use this only for hard, ambiguous, resumed, or repeatedly failing reversing work. It reduces avoidable errors through explicit phase control and independent verification.
 
 ## Phase Lock
 
@@ -111,9 +111,9 @@ If a fatal flaw appears, return to the first phase capable of fixing it. Do not 
 | original cannot execute | environment blocker | record exact error/hash; build strongest supporting replay |
 | Daybreak/TAC intervention | access/policy blocker | preserve state; continue only with an available authorized model |
 
-## Deep Playbook Handoff
+## Deep Reference Handoff
 
-Pull `rev-final-fastpath` only after the lane is selected and this harness has a concrete missing technique. Copy the chosen tactic and its required evidence into state, then return to one phase and one lane. Do not follow several deep-playbook lanes simultaneously.
+Read [local-corpus patterns](local-corpus-patterns.md) only after the lane is selected and this harness has a concrete missing technique. Copy the chosen tactic and its required evidence into state, then return to one phase and one lane. Do not follow several deep-reference lanes simultaneously.
 
 ## Final Gate
 
